@@ -1,0 +1,4 @@
+*.stdout
+*.ali
+*.o
+./obj
