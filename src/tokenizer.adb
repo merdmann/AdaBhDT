@@ -3,7 +3,7 @@ with ada.text_io;   use ada.text_io;
 
 package body tokenizer is
    input                : file_type;
-   line                 : array(1..100) of character;
+   line                 : String( 1..100 );
    last                 : natural :=0;
    next                 : natural :=0;
 
@@ -20,9 +20,11 @@ package body tokenizer is
    ----------------
    function next_char return Token_Type is
       ch                : character;
+      result            : Token_Type;
    begin
       if end_of_file( input ) then
-         return End_Of_File;
+         result.typeOf := End_Of_File;
+         return result;
       end if;
 
       if next = last then
@@ -35,7 +37,10 @@ package body tokenizer is
 
       next := next + 1;
 
-      return ch;
+      result.typeOf := T_Char;
+      result.value(2) := ch;
+
+      return result;
    end next_char;
 
    --------------------
@@ -50,10 +55,12 @@ package body tokenizer is
    -- next_word --
    ---------------
    function next_token return Token_Type is
-      ch                : character := next_char;
+      ch                : Token_Type := next_char;
       State             : enum ( S_Null, S_Identifier, S_Sring, S_Comment, S_END );
    begin
-      while not input.end_of_file loop
+      while not ch.typeOf = End_Of_File loop
+         declare
+         begin
          case State is
          when S_Null =>
             if ch in 'a'..'z' or  ch in 'A'..'Z' or ch in '0'..'9' then
@@ -80,10 +87,11 @@ package body tokenizer is
             identifier(k) := ch;
             k := k + 1;
 
-         end case;
-      end loop
+            end case;
+         end;
+      end loop;
 
-      return
+      return;
    end next_token;
 
 
