@@ -34,14 +34,12 @@ package body tokenizer is
          next := 1;
       end if;
 
-      if next in line'Range then
+      if next in 1..last then
          ch := line(next);
-
          next := next + 1;
       else
-         Put_Line("next: " & Natural'Image(next));
+         Put_Line("Error: ");
       end if;
-
 
       result.char := ch;
 
@@ -61,7 +59,7 @@ package body tokenizer is
    ---------------
    function next_token return Token_Type is
       Result            : Token_Type;
-      ch                : character := next_char.char;
+      ch                : character;
       type State_Type  is ( S_Null,
                             S_Identifier,
                             S_Number,
@@ -71,11 +69,17 @@ package body tokenizer is
       State             : State_Type := S_Null;
    begin
       while not end_of_file( input ) and state /= S_END loop
+         ch := next_char.char;
+
+         put_line( State_Type'Image(State));
+
          case State is
          -- ..................................................................
          when S_Null =>
             if ch in 'a'..'z' or  ch in 'A'..'Z' then
                state := S_Identifier;
+               result.length := 1;
+               result.identifier( result.length ) := ch;
                result.typeOf := T_Identifier;
             end if;
 
@@ -106,7 +110,7 @@ package body tokenizer is
          when S_Number =>
             if ch in '0'..'9' then
                result.number(result.length) := ch;
-               result.length := result.length + 1;
+               result.length := 1;
                result.typeOf := T_Number;
             else
                state := S_END;
@@ -120,9 +124,10 @@ package body tokenizer is
 
          -- ..................................................................
          when S_Identifier =>
-            if not (ch in 'a'..'z') or (ch in 'A'..'z') or (ch in '0'..'9' ) then
+            if not (ch in 'a'..'z') and not (ch in 'A'..'z') and not (ch in '0'..'9' ) then
                State := S_End;
             else
+               put_line(Natural'Image(result.length) & " " & ch);
                result.identifier(result.length) := ch;
 
                if result.length in result.identifier'Range then
